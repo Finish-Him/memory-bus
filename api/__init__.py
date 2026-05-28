@@ -6,14 +6,17 @@ from fastapi.middleware.cors import CORSMiddleware
 import time
 import os
 
-from .routers import ingest, search, agents, health
 from .services.database import DatabasePool
 from .services.embedder import Embedder
 from .services.gate import QualityGate
+from .dependencies import set_services
 
 db_pool = DatabasePool()
 embedder = Embedder()
 quality_gate = QualityGate()
+
+# Register singletons early
+set_services(db_pool, embedder, quality_gate)
 
 
 @asynccontextmanager
@@ -47,7 +50,7 @@ app.add_middleware(
 async def verify_api_key(x_api_key: str = Header(...)):
     expected = os.getenv("API_KEY", "")
     if not expected:
-        return  # no auth configured
+        return
     if x_api_key != expected:
         raise HTTPException(status_code=401, detail="Invalid API key")
     return x_api_key
@@ -66,7 +69,9 @@ async def rate_limit(request: Request, call_next):
     return response
 
 
-# --- Routers ---
+# --- Routers (import after app creation to avoid circular imports) ---
+
+from .routers import health, ingest, search, agents
 
 app.include_router(health.router, tags=["health"])
 app.include_router(
@@ -87,17 +92,3 @@ app.include_router(
     tags=["agents"],
     dependencies=[Depends(verify_api_key)],
 )
-
-
-# --- Dependency injection for services ---
-
-def get_db():
-    return db_pool
-
-
-def get_embedder():
-    return embedder
-
-
-def get_gate():
-    return quality_gate

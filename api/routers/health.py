@@ -1,7 +1,7 @@
 """Health check router."""
 
 from fastapi import APIRouter
-from .services.database import DatabasePool
+from ..dependencies import get_db
 
 router = APIRouter()
 
@@ -15,7 +15,7 @@ async def health_check():
 @router.get("/health/ready")
 async def readiness():
     """Readiness probe — checks database connectivity."""
-    db = DatabasePool()
+    db = get_db()
     connected = await db.health_check()
     return {
         "ok": connected,

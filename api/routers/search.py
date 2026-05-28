@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from ..models import SearchRequest, SearchResponse, SearchResult
 from ..services.database import DatabasePool, AGENT_SCHEMAS
 from ..services.embedder import Embedder
-from .. import get_db, get_embedder
+from ..dependencies import get_db, get_embedder
 
 router = APIRouter()
 

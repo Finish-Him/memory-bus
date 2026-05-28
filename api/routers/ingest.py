@@ -7,7 +7,7 @@ from ..models import IngestRequest, IngestResponse
 from ..services.database import DatabasePool, AGENT_SCHEMAS
 from ..services.embedder import Embedder
 from ..services.gate import QualityGate
-from .. import get_db, get_embedder, get_gate
+from ..dependencies import get_db, get_embedder, get_gate
 
 router = APIRouter()
 

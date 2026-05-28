@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ..models import AgentStats
 from ..services.database import DatabasePool, AGENT_SCHEMAS
-from .. import get_db
+from ..dependencies import get_db
 
 router = APIRouter()
 
