@@ -1,0 +1,33 @@
+"""Embedding service — OpenAI text-embedding-3-small."""
+
+import os
+from openai import AsyncOpenAI
+
+
+class Embedder:
+    """Generates embeddings via OpenAI API."""
+
+    def __init__(self):
+        self.client: AsyncOpenAI = None
+        self.model: str = "text-embedding-3-small"
+        self.dimensions: int = 1536
+
+    async def configure(self, model: str, dimensions: int):
+        self.model = model
+        self.dimensions = dimensions
+        self.client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    async def embed(self, texts: list[str]) -> list[list[float]]:
+        """Generate embeddings for a batch of texts."""
+        if not self.client:
+            raise RuntimeError("Embedder not configured")
+        response = await self.client.embeddings.create(
+            model=self.model,
+            input=texts,
+            dimensions=self.dimensions,
+        )
+        return [d.embedding for d in response.data]
+
+    async def embed_single(self, text: str) -> list[float]:
+        results = await self.embed([text])
+        return results[0]
