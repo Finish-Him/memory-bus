@@ -26,6 +26,10 @@ async def lifespan(app: FastAPI):
         os.getenv("EMBEDDING_MODEL", "text-embedding-3-small"),
         int(os.getenv("EMBEDDING_DIMENSIONS", "1536")),
     )
+    # Ensure all agent schemas exist
+    from .services.database import AGENT_SCHEMAS
+    for schema in AGENT_SCHEMAS:
+        await db_pool.run_migration(schema)
     yield
     await db_pool.disconnect()
 

@@ -217,31 +217,15 @@ class DatabasePool:
             row = await conn.fetchrow(
                 f"""
                 SELECT
-                    COUNT(DISTINCT d.id) as total_documents,
-                    COUNT(c.id) as total_chunks,
-                    COUNT(c.id) FILTER (WHERE c.embedding IS NOT NULL) as embedded_chunks,
-                    COUNT(c.id) FILTER (WHERE c.sensitivity = 'blocked') as blocked_chunks,
-                    COALESCE(jsonb_object_agg(
-                        c.sensitivity, cnt
-                    ) FILTER (WHERE c.sensitivity IS NOT NULL), '{{}}') as by_sensitivity,
-                    COALESCE(jsonb_object_agg(
-                        c.metadata->>'purpose', cnt
-                    ) FILTER (WHERE c.metadata->>'purpose' IS NOT NULL), '{{}}') as by_purpose,
+                    COUNT(DISTINCT d.id)::int as total_documents,
+                    COUNT(c.id)::int as total_chunks,
+                    COUNT(c.id) FILTER (WHERE c.embedding IS NOT NULL)::int as embedded_chunks,
+                    COUNT(c.id) FILTER (WHERE c.sensitivity = 'blocked')::int as blocked_chunks,
                     MAX(d.created_at) as last_ingest
                 FROM {schema}.documents d
-                LEFT JOIN {schema}.chunks c ON c.document_id = d.id,
-                LATERAL (
-                    SELECT c2.sensitivity, COUNT(*) as cnt
-                    FROM {schema}.chunks c2
-                    WHERE c2.document_id = d.id
-                    GROUP BY c2.sensitivity
-                ) sens,
-                LATERAL (
-                    SELECT c3.metadata->>'purpose' as purpose, COUNT(*) as cnt
-                    FROM {schema}.chunks c3
-                    WHERE c3.document_id = d.id
-                    GROUP BY c3.metadata->>'purpose'
-                ) purp
-                """,
+                LEFT JOIN {schema}.chunks c ON c.document_id = d.id
+                """
             )
-            return dict(row) if row else {}
+            if not row:
+                return {}
+            return dict(row)
