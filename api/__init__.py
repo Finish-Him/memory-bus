@@ -65,6 +65,9 @@ async def verify_api_key(x_api_key: str = Header(...)):
 @app.middleware("http")
 async def rate_limit(request: Request, call_next):
     rpm = int(os.getenv("RATE_LIMIT_PER_MINUTE", "60"))
+    # Skip rate limiting for localhost
+    if request.client and request.client.host in ("127.0.0.1", "10.0.3.1"):
+        return await call_next(request)
     key = f"rl:{request.client.host}:{int(time.time() / 60)}"
     current = await db_pool.rate_limit_check(key, rpm)
     if current > rpm:

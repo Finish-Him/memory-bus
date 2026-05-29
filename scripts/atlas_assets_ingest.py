@@ -37,7 +37,7 @@ def ingest_atlas_assets():
             loc = asset.get("localizacao", "")
             setor = asset.get("setor", "")
             status = asset.get("status", "")
-            valor = asset.get("valor_aquisicao", 0)
+            valor = asset.get("valor_aquisicao") or 0
             obs = asset.get("observacao", "")
 
             content = (
