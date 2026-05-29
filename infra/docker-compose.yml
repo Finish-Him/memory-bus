@@ -8,11 +8,14 @@ services:
       - ../.env
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-memory_bus}
+      HF_HOME: /app/.cache/huggingface
     depends_on:
       postgres:
         condition: service_healthy
     ports:
       - "127.0.0.1:8400:8400"
+    volumes:
+      - hf-cache:/app/.cache/huggingface
     networks:
       - memory-bus
 
@@ -32,7 +35,7 @@ services:
       timeout: 5s
       retries: 5
     ports:
-      - "127.0.0.1:5433:5432"  # internal only, different port to avoid conflict
+      - "127.0.0.1:5433:5432"
     networks:
       - memory-bus
 
@@ -43,3 +46,4 @@ networks:
 
 volumes:
   memory-bus-pgdata:
+  hf-cache:
