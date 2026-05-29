@@ -21,7 +21,7 @@ SKIP_PATTERNS = [
 ]
 MIN_CHUNK_SIZE = 50  # chars
 MAX_CHUNK_SIZE = 1500
-BATCH_SIZE = 10  # documents per request
+BATCH_SIZE = 3  # documents per request (keep payloads under 1MB)
 
 
 def split_by_headings(text: str) -> list[str]:
