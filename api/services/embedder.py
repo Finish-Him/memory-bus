@@ -1,11 +1,11 @@
-"""Embedding service — OpenAI text-embedding-3-small."""
+"""Embedding service — OpenAI / OpenRouter compatible."""
 
 import os
 from openai import AsyncOpenAI
 
 
 class Embedder:
-    """Generates embeddings via OpenAI API."""
+    """Generates embeddings via OpenAI-compatible API."""
 
     def __init__(self):
         self.client: AsyncOpenAI = None
@@ -15,7 +15,14 @@ class Embedder:
     async def configure(self, model: str, dimensions: int):
         self.model = model
         self.dimensions = dimensions
-        self.client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        base_url = os.getenv("EMBEDDING_BASE_URL", "https://api.openai.com/v1")
+        api_key = os.getenv("EMBEDDING_API_KEY", os.getenv("OPENAI_API_KEY", ""))
+
+        self.client = AsyncOpenAI(
+            api_key=api_key,
+            base_url=base_url,
+        )
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for a batch of texts."""
